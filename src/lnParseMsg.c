@@ -4,6 +4,8 @@
 #include <strings.h>
 #include <string.h>
 
+//#define DEBUG
+
 #define GPGGA 0
 #define GPGLL 1
 #define GPGSA 2
@@ -29,7 +31,9 @@ int __is_checksum_valid(int checksum, char* sumStr){
 	int parsedSum = 0;
 	sscanf(sumStr, "%x", &parsedSum);
 
+#ifdef DEBUG
 	printf("scanned sum: %x, calced: %x\n", parsedSum, checksum);
+#endif
 
 	return parsedSum == checksum;
 }
@@ -40,11 +44,16 @@ int __calc_checksum(char* msg, char** sumStr){
 	/* consume string, until the next char is the '*'
 	   or the beginning of the sum */
 	for(; msg[i] != '*'; i++){
+#ifdef DEBUG
 		printf("%c ", msg[i]);
+#endif
+
 		c ^= msg[i];
 	}		
 
+#ifdef DEBUG
 	printf("\n%c %c\n", msg[0], msg[2]);
+#endif
 
 	/* retain the sum string */
 	*sumStr = &msg[i + 1];
@@ -88,7 +97,9 @@ int __GGA(GpsState* state, char* msgData){
 		memcpy(deg, lastToken, 2);
 		sscanf(min, "%f", &minutes);
 		sscanf(deg, "%f", &state->Lat);
+#ifdef DEBUG
 		printf("Token='%s' lastToken='%s'\n", token, lastToken);
+#endif
 
 		state->Lat += (MIN2DEG * minutes);
 		latDone = 1;
@@ -101,7 +112,9 @@ int __GGA(GpsState* state, char* msgData){
 		memcpy(deg, lastToken, 3);
 		sscanf(min, "%f", &minutes);
 		sscanf(deg, "%f", &state->Lon);
+#ifdef DEBUG
 		printf("Token='%s' lastToken='%s'\n", token, lastToken);
+#endif
 
 		state->Lon += (MIN2DEG * minutes);
 		lonDone = 1;
@@ -205,7 +218,9 @@ int lnParseMsg(GpsState* state, char* msg){
 			break;
 	}
 
+#ifdef DEBUG
 	printf("%s\n%s\n", msgType, msgData);
+#endif
 
 	return 0;
 }

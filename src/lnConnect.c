@@ -12,7 +12,7 @@ int FD_GPS = 0;
 int lnConnect(const char* dev, int baud){
 	struct termios toptions;
 
-	if(!(FD_GPS = open(dev, O_RDWR | O_NONBLOCK ))){
+	if(!(FD_GPS = open(dev, O_RDWR))){
         	perror("serialport_init: Unable to open port ");
         	return -1;
 	}
@@ -54,13 +54,15 @@ int lnConnect(const char* dev, int baud){
 	toptions.c_cflag |= CREAD | CLOCAL;
 	// turn off s/w flow ctrl
 	toptions.c_iflag &= ~(IXON | IXOFF | IXANY);
-	toptions.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); // make raw
+	toptions.c_lflag = ICANON; // make raw
 	toptions.c_oflag &= ~OPOST; // make raw
 
 	// see: http://unixwiz.net/techtips/termios-vmin-vtime.html
 	toptions.c_cc[VMIN]  = 0;
 	toptions.c_cc[VTIME] = 0;
-
+	toptions.c_cc[VEOL]   = '\r';
+	toptions.c_cc[VEOL2]  = '\n';
+	
 	tcsetattr(FD_GPS, TCSANOW, &toptions);
 	if( tcsetattr(FD_GPS, TCSAFLUSH, &toptions) < 0) {
 		perror("init_serialport: Couldn't set term attributes");
