@@ -17,7 +17,8 @@ int lnReadMsg(char* buf, int size){
 	++i;
 	
 	// read the contents of a sentence
-	while(read(FD_GPS, &buf[i], 1) && buf[i] != '\n') ++i;
+	while(buf[i] != '\n' && i < size - 1)
+		read(FD_GPS, &buf[++i], 1); 
 
 	return i;
 }

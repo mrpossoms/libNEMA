@@ -9,7 +9,8 @@ typedef struct{
 
 extern int FD_GPS;
 
-int lnConnect(const char* dev, int baud);
-int lnReadMsg(char* dst, int size);
+int lnConnect (const char* dev, int baud);
+int lnReadMsg (char* dst, int size);
+int lnParseMsg(GpsState* state, char* msg);
 
 #endif
