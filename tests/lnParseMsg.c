@@ -4,13 +4,15 @@
 int main(void){
 	char buf[1024];
 	GpsState state;
-
+	
 	__title("lnParseMsg()");
 	bzero(buf, 1024);
 	
 	__msg("Connecting...");
 	int fd = lnConnect("/dev/ttyAMA0", 9600);
 	int size = 0;
+	
+	lnGenState(&state, NULL);
 
 	sleep(1);
 	
@@ -21,6 +23,8 @@ int main(void){
 		lnParseMsg(&state, buf);
 		sleep(1);
 		bzero(buf, 1024);
+
+		lnPrintState(&state);
 	}
 
 	//assert(lnReadMsg(buf, 1024) > 0);

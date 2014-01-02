@@ -13,19 +13,90 @@
 #define GPTXT 6
 
 #define MIN2DEG 0.0166666667f
-int __GLL(char* msgData){
-	char checksum = 0;
-	char lastToken[32];
-	char* token;
-	float last = 0;
-	float alt = 0;
-	float lat = 0, lon = 0;			
 
-	token = strtok(msgData, ",");
+#define START_PARSE() char checksum = 0;\
+	char lastToken[32];\
+	char* token;\
+	token = strtok(msgData, ",");\
+	do{\
 
-	do{
-		printf("tok: %s float: %f\n", token, last);
+#define CONTINUE_PARSE() memcpy(lastToken, token, strlen(token));\
+	} while(token = strtok(NULL, ","));\
 
+
+int __GGA(GpsState* state, char* msgData){
+	int timeDone = 0;
+	int qualityDone = 0;
+	int HDOFDone = 0;
+	int satellitesDone = 0;
+	int altitudeDone = 0;
+
+	START_PARSE()
+
+	if(!timeDone){
+		char  hour[3] = {0};
+		char  min[3] = {0};
+		char* sec;
+		float seconds = 0;
+
+		memcpy(hour, msgData, 2);
+		memcpy(min, msgData + 2, 2);
+		sec = msgData + 4;
+
+		sscanf(sec,  "%f", &seconds);
+		sscanf(min,  "%d", &state->Minute);
+		sscanf(hour, "%d", &state->Hour);
+
+		state->Second = (int)seconds;
+
+		timeDone = 1;
+	}
+	else if(!strcmp(token, "N")){
+		char* min = lastToken + 2;
+		char  deg[3] = {0};
+		float minutes = 0;
+	
+		memcpy(deg, lastToken, 2);
+		sscanf(min, "%f", &minutes);
+		sscanf(deg, "%f", &state->Lat);
+
+		state->Lat += (MIN2DEG * minutes);
+	}
+	else if(!strcmp(token, "W")){
+		char* min = lastToken + 3;
+		char  deg[4] = {0};
+		float minutes = 0;
+	
+		memcpy(deg, lastToken, 3);
+		sscanf(min, "%f", &minutes);
+		sscanf(deg, "%f", &state->Lon);
+
+		state->Lon += (MIN2DEG * minutes);
+	}
+	else if(!qualityDone){
+		// TODO
+		qualityDone = 1;
+	}
+	else if(!satellitesDone){
+		sscanf(token, "%d", &state->Satellites);
+		satellitesDone = 1;
+	}
+	else if(!HDOFDone){
+		sscanf(token, "%f", &state->HDOP);
+		HDOFDone = 1;
+	}
+	else if(!altitudeDone){
+		sscanf(token, "%f", &state->Altitude);
+		altitudeDone = 1;
+	}
+	
+	CONTINUE_PARSE()
+	return 0;
+}
+
+int __GLL(GpsState* state, char* msgData){
+
+	START_PARSE()
 		if(!strcmp(token, "N")){
 			char* min = lastToken + 2;
 			char  deg[3] = {0};
@@ -36,8 +107,6 @@ int __GLL(char* msgData){
 			sscanf(deg, "%f", &state->Lat);
 
 			state->Lat += (MIN2DEG * minutes);
-
-			printf("Lat: %f\n", state->Lat);
 		}
 
 		if(!strcmp(token, "W")){
@@ -50,13 +119,9 @@ int __GLL(char* msgData){
 			sscanf(deg, "%f", &state->Lon);
 
 			state->Lon += (MIN2DEG * minutes);
-
-			printf("Lon: %f\n", state->Lon);
 		}
 
-		memcpy(lastToken, token, strlen(token));
-	} while(token = strtok(NULL, ","));
-
+	CONTINUE_PARSE()
 	return 0;
 }
 
@@ -66,10 +131,6 @@ int lnParseMsg(GpsState* state, char* msg){
 	int i_msgType = -1;
 	bzero(msgType, sizeof(msgType));
 
-	write(1, "Parse: ", 7);
-	write(1, msg, strlen(msg));
-	write(1, "\n", 1);
-	
 	memcpy((char*)msgType, &msg[1], 5);
 	msgData = &msg[6];
 
@@ -82,14 +143,15 @@ int lnParseMsg(GpsState* state, char* msg){
 	if(!strcmp(msgType, "GPVTG")) i_msgType = GPVTG;
 	if(!strcmp(msgType, "GPTXT")) i_msgType = GPTXT;
 
-	printf("Parse: %s, %d\n", msgType, i_msgType); 
-	
 	switch(i_msgType){
 		case GPGGA:
-			break;
+		{
+
+			__GGA(state, msgData);
+		} break;
 		case GPGLL:
 		{
-			__GLL(msgData);
+			__GLL(state, msgData);
 			//printf("lat: %f\nlon: %f\n", state->Lat, state->Lon);
 		} break;
 		case GPGSA:
