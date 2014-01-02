@@ -6,7 +6,11 @@ typedef struct __gps_state GpsState;
 struct __gps_state{
 	float Lat;
 	float Lon;
+	float Altitude;
 	float Speed;
+	char Hour, Minute, Second;
+	char Satellites;
+	float HDOP;      // Hosizontal dilution of precision
 	void (*OnUpdate)(GpsState*);
 };
 

@@ -13,6 +13,52 @@
 #define GPTXT 6
 
 #define MIN2DEG 0.0166666667f
+int __GLL(char* msgData){
+	char checksum = 0;
+	char lastToken[32];
+	char* token;
+	float last = 0;
+	float alt = 0;
+	float lat = 0, lon = 0;			
+
+	token = strtok(msgData, ",");
+
+	do{
+		printf("tok: %s float: %f\n", token, last);
+
+		if(!strcmp(token, "N")){
+			char* min = lastToken + 2;
+			char  deg[3] = {0};
+			float minutes = 0;
+	
+			memcpy(deg, lastToken, 2);
+			sscanf(min, "%f", &minutes);
+			sscanf(deg, "%f", &state->Lat);
+
+			state->Lat += (MIN2DEG * minutes);
+
+			printf("Lat: %f\n", state->Lat);
+		}
+
+		if(!strcmp(token, "W")){
+			char* min = lastToken + 3;
+			char  deg[4] = {0};
+			float minutes = 0;
+	
+			memcpy(deg, lastToken, 3);
+			sscanf(min, "%f", &minutes);
+			sscanf(deg, "%f", &state->Lon);
+
+			state->Lon += (MIN2DEG * minutes);
+
+			printf("Lon: %f\n", state->Lon);
+		}
+
+		memcpy(lastToken, token, strlen(token));
+	} while(token = strtok(NULL, ","));
+
+	return 0;
+}
 
 int lnParseMsg(GpsState* state, char* msg){
 	char msgType[6];
@@ -43,49 +89,7 @@ int lnParseMsg(GpsState* state, char* msg){
 			break;
 		case GPGLL:
 		{
-			char checksum = 0;
-			char lastToken[32];
-			char* token;
-			float last = 0;
-			float alt = 0;
-			float lat = 0, lon = 0;			
-
-			token = strtok(msgData, ",");
-
-			do{
-				printf("tok: %s float: %f\n", token, last);
-
-				if(!strcmp(token, "N")){
-					char* min = lastToken + 2;
-					char  deg[3] = {0};
-					float minutes = 0;
-	
-					memcpy(deg, lastToken, 2);
-					sscanf(min, "%f", &minutes);
-					sscanf(deg, "%f", &state->Lat);
-
-					state->Lat += (MIN2DEG * minutes);
-
-					printf("Lat: %f\n", state->Lat);
-				}
-
-				if(!strcmp(token, "W")){
-					char* min = lastToken + 3;
-					char  deg[4] = {0};
-					float minutes = 0;
-	
-					memcpy(deg, lastToken, 3);
-					sscanf(min, "%f", &minutes);
-					sscanf(deg, "%f", &state->Lon);
-
-					state->Lon += (MIN2DEG * minutes);
-
-					printf("Lon: %f\n", state->Lon);
-				}
-
-				memcpy(lastToken, token, strlen(token));
-			} while(token = strtok(NULL, ","));
-
+			__GLL(msgData);
 			//printf("lat: %f\nlon: %f\n", state->Lat, state->Lon);
 		} break;
 		case GPGSA:
