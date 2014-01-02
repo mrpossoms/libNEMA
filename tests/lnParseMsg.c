@@ -14,14 +14,13 @@ int main(void){
 
 	sleep(1);
 	
-	while(1){
-		while(size = lnReadMsg(buf, 1024)){
-			write(1, buf, size);
-			write(1, "\n", 1);
-			bzero(buf, 1024);
-			sleep(1);
-		}
+	while(size = lnReadMsg(buf, 1024)){
+		int i = 0;
+		write(1, buf, size);
+		write(1, "\n", 1);
+		lnParseMsg(&state, buf);
 		sleep(1);
+		bzero(buf, 1024);
 	}
 
 	//assert(lnReadMsg(buf, 1024) > 0);
