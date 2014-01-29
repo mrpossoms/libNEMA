@@ -75,6 +75,7 @@ int __GGA(GpsState* state, char* msgData){
 	}
 	else if(!qualityDone){
 		// TODO
+		sscanf(token, "%d", &state->Fix);
 		qualityDone = 1;
 	}
 	else if(!satellitesDone){
