@@ -3,22 +3,32 @@
 #include <string.h>
 #include <strings.h>
 
+// checksum is wrong on message below
+char* GPGLL_TEST_BAD = "$GPGLL,4916.45,N,12311.12,W,225444,A,*1F\0";
 char* GPGLL_TEST = "$GPGLL,4916.45,N,12311.12,W,225444,A,*1D\0";
 char* GPGAA_TEST = "$GPGGA,065500.00,2447.65027,N,12100.78318,W,2,12,0.91,69.8,M,16.3,M,,*65\0";
 
-int main(void){
-	char buf[1024];
+void lnParseMsgShouldFailBadCheckSum(void){
 	GpsState state = {0};
-	
 	__title("lnParseMsg()");
 	bzero(buf, 1024);
 	
-	__msg("Connecting...");
-	int fd = lnConnect("/dev/ttyAMA0", 9600);
-	int size = 0, i = 0;
+	lnGenState(&state, NULL);
+
+	memcpy(buf, GPGLL_TEST_BAD, strlen(GPGLL_TEST_BAD));
+	printf("%s\n", buf);
+	assert(lnParseMsg(&state, buf) < 0); // should fail
+	lnPrintState(&state);
+	printf("\n");
+}
+
+void lnParseMsgShouldSucceedGPGAA(void){
+	GpsState state = {0};
+	__title("lnParseMsg()");
+	bzero(buf, 1024);
 	
 	lnGenState(&state, NULL);
-	
+
 	memcpy(buf, GPGAA_TEST, strlen(GPGAA_TEST));
 	printf("%s\n", buf);
 	lnParseMsg(&state, buf);
@@ -39,7 +49,14 @@ int main(void){
 	assert(state.Fix == 2);
 	assert(state.Satellites == 12);
 	assert(state.HDOP == 0.91f);
+}
 
+void lnParseMsgShouldSucceedGPGLL(){
+	GpsState state = {0};
+	__title("lnParseMsg()");
+	bzero(buf, 1024);
+	
+	lnGenState(&state, NULL);
 
 	memcpy(buf, GPGLL_TEST, strlen(GPGLL_TEST));
 	printf("%s\n", buf);
@@ -51,6 +68,22 @@ int main(void){
 	// assert coordinates
 	assert((int)state.Lat == 49);
 	assert((int)state.Lon == 123);
+}
+
+int main(void){
+	char buf[1024];
+	GpsState state = {0};
+	
+	__title("lnParseMsg()");
+	bzero(buf, 1024);
+	
+	__msg("Connecting...");
+	int fd = lnConnect("/dev/ttyAMA0", 9600);
+	int size = 0, i = 0;
+
+	lnParseMsgShouldSucceedGPGLL();
+	lnParseMsgShouldSucceedGPGAA();
+	lnParseMsgShouldFailBadCheckSum();
 
 	sleep(1);
 

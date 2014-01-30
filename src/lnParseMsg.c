@@ -24,7 +24,28 @@
 	memcpy(lastToken, token, strlen(token));\
 	} while(token = strtok(NULL, ","));\
 
+/*---------------------------------------------------------------------------*/
+int __is_checksum_valid(int checksum, char* sumStr){
+	int parsedSum = 0;
+	sscanf(sumStr, "%d", &parsedSum);
 
+	return sumStr == checksum;
+}
+/*---------------------------------------------------------------------------*/
+int __calc_checksum(char* msg, char** sumStr){
+	int c = 0;
+
+	/* consume string, until the next char is the '*'
+	   or the beginning of the sum */
+	while(msg[1] != '*')
+		c ^= *msg++;
+
+	/* retain the sum string */
+	*sumStr = msg[2];
+
+	return c;
+}
+/*---------------------------------------------------------------------------*/
 int __GGA(GpsState* state, char* msgData){
 	int timeDone = 0;
 	int qualityDone = 0;
@@ -85,7 +106,6 @@ int __GGA(GpsState* state, char* msgData){
 		continue;
 	}
 	else if(!qualityDone){
-		// TODO
 		sscanf(token, "%d", &state->Fix);
 		qualityDone = 1;
 	}
@@ -105,7 +125,7 @@ int __GGA(GpsState* state, char* msgData){
 	CONTINUE_PARSE()
 	return 0;
 }
-
+/*---------------------------------------------------------------------------*/
 int __GLL(GpsState* state, char* msgData){
 	START_PARSE()
 		if(!strcmp(token, "N")){
@@ -135,36 +155,38 @@ int __GLL(GpsState* state, char* msgData){
 
 	return 0;
 }
-
+/*---------------------------------------------------------------------------*/
 int lnParseMsg(GpsState* state, char* msg){
 	char msgType[6];
-	char* msgData = NULL;
-	int i_msgType = -1;
-	bzero(msgType, sizeof(msgType));
+	char* msgData = NULL, *checksumStr = NULL;
+	int msgIndex = -1;
+	int checksum = __calc_checksum(msg, &checksumStr);
 
+	/* make sure this message isn't crap */
+	if(!__is_checksum_valid(checksum, checksumStr)){
+		return -1;
+	}
+
+	/* split the message header and the data */
+	bzero(msgType, sizeof(msgType));
 	memcpy((char*)msgType, &msg[1], 5);
 	msgData = &msg[6];
 
+	if(!strcmp(msgType, "GPGGA")) msgIndex = GPGGA;
+	if(!strcmp(msgType, "GPGLL")) msgIndex = GPGLL;
+	if(!strcmp(msgType, "GPGSA")) msgIndex = GPGSA;
+	if(!strcmp(msgType, "GPGSV")) msgIndex = GPGSV;
+	if(!strcmp(msgType, "GPRMC")) msgIndex = GPRMC;
+	if(!strcmp(msgType, "GPVTG")) msgIndex = GPVTG;
+	if(!strcmp(msgType, "GPTXT")) msgIndex = GPTXT;
 
-	if(!strcmp(msgType, "GPGGA")) i_msgType = GPGGA;
-	if(!strcmp(msgType, "GPGLL")) i_msgType = GPGLL;
-	if(!strcmp(msgType, "GPGSA")) i_msgType = GPGSA;
-	if(!strcmp(msgType, "GPGSV")) i_msgType = GPGSV;
-	if(!strcmp(msgType, "GPRMC")) i_msgType = GPRMC;
-	if(!strcmp(msgType, "GPVTG")) i_msgType = GPVTG;
-	if(!strcmp(msgType, "GPTXT")) i_msgType = GPTXT;
-
-	switch(i_msgType){
+	switch(msgIndex){
 		case GPGGA:
-		{
-
 			__GGA(state, msgData);
-		} break;
+			break;
 		case GPGLL:
-		{
 			__GLL(state, msgData);
-			//printf("lat: %f\nlon: %f\n", state->Lat, state->Lon);
-		} break;
+			break;
 		case GPGSA:
 			break;
 		case GPGSV:
