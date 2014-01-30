@@ -8,8 +8,8 @@ struct __gps_state{
 	float Lon;
 	float Altitude;
 	float Speed;
-	char Hour, Minute, Second;
-	char Satellites;
+	int Hour, Minute, Second;
+	int Satellites;
 	int  Fix;
 	float HDOP;      // Hosizontal dilution of precision
 	void (*OnUpdate)(GpsState*);
