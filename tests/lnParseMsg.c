@@ -6,9 +6,10 @@
 // checksum is wrong on message below
 char* GPGLL_TEST_BAD = "$GPGLL,4916.45,N,12311.12,W,225444,A,*1F\0";
 char* GPGLL_TEST = "$GPGLL,4916.45,N,12311.12,W,225444,A,*1D\0";
-char* GPGAA_TEST = "$GPGGA,065500.00,2447.65027,N,12100.78318,W,2,12,0.91,69.8,M,16.3,M,,*65\0";
+char* GPGAA_TEST = "$GPGGA,,,,,,0,00,99.99,,,,,,*48";
 
 void lnParseMsgShouldFailBadCheckSum(void){
+	char buf[1024];
 	GpsState state = {0};
 	__title("lnParseMsg()");
 	bzero(buf, 1024);
@@ -24,6 +25,7 @@ void lnParseMsgShouldFailBadCheckSum(void){
 
 void lnParseMsgShouldSucceedGPGAA(void){
 	GpsState state = {0};
+	char buf[1024];
 	__title("lnParseMsg()");
 	bzero(buf, 1024);
 	
@@ -36,23 +38,24 @@ void lnParseMsgShouldSucceedGPGAA(void){
 	printf("\n");
 
 	// assert date
-	assert(state.Hour == 06);
-	assert(state.Minute == 55);
-	assert(state.Second == 00);
+	assert(state.Hour == 0);
+	assert(state.Minute == 0);
+	assert(state.Second == 0);
 
 	// assert coordinates
-	assert((int)state.Lat == 24);
-	assert((int)state.Lon == 121);
-	assert((int)state.Altitude == 69);
+	assert((int)state.Lat == 0);
+	assert((int)state.Lon == 0);
+	assert((int)state.Altitude == 0);
 
 	// assert fix state
-	assert(state.Fix == 2);
-	assert(state.Satellites == 12);
-	assert(state.HDOP == 0.91f);
+	assert(state.Fix == 0);
+	assert(state.Satellites == 0);
+	assert(state.HDOP == 0);
 }
 
 void lnParseMsgShouldSucceedGPGLL(){
 	GpsState state = {0};
+	char buf[1024];
 	__title("lnParseMsg()");
 	bzero(buf, 1024);
 	
@@ -82,9 +85,9 @@ int main(void){
 	int size = 0, i = 0;
 
 	lnParseMsgShouldSucceedGPGLL();
-	lnParseMsgShouldSucceedGPGAA();
 	lnParseMsgShouldFailBadCheckSum();
-
+	lnParseMsgShouldSucceedGPGAA();
+	
 	sleep(1);
 
 	while(size = lnReadMsg(buf, 1024)){

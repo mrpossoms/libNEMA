@@ -27,21 +27,27 @@
 /*---------------------------------------------------------------------------*/
 int __is_checksum_valid(int checksum, char* sumStr){
 	int parsedSum = 0;
-	sscanf(sumStr, "%d", &parsedSum);
+	sscanf(sumStr, "%x", &parsedSum);
 
-	return sumStr == checksum;
+	printf("scanned sum: %x, calced: %x\n", parsedSum, checksum);
+
+	return parsedSum == checksum;
 }
 /*---------------------------------------------------------------------------*/
 int __calc_checksum(char* msg, char** sumStr){
-	int c = 0;
+	int c = 0, i = 1;
 
 	/* consume string, until the next char is the '*'
 	   or the beginning of the sum */
-	while(msg[1] != '*')
-		c ^= *msg++;
+	for(; msg[i] != '*'; i++){
+		printf("%c ", msg[i]);
+		c ^= msg[i];
+	}		
+
+	printf("\n%c %c\n", msg[0], msg[2]);
 
 	/* retain the sum string */
-	*sumStr = msg[2];
+	*sumStr = &msg[i + 1];
 
 	return c;
 }
