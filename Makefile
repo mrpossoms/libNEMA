@@ -21,6 +21,8 @@ testlib: $(SRC)
 
 tests: testlib
 	$(foreach test, $(TSTS), gcc $(test) -o $(TST)/bin/$(test).bin
+install:
+	echo 'This will install the library'
 clean:
 	find ./ -iname "*.a" -exec rm {} \;
 	find ./ -iname "*.o" -exec rm {} \;
