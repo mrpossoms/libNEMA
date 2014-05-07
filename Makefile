@@ -22,7 +22,9 @@ testlib: $(SRC)
 tests: testlib
 	$(foreach test, $(TSTS), gcc $(test) -o $(TST)/bin/$(test).bin
 install:
-	echo 'This will install the library'
+	echo -n "Installing the library"
+	cp ./$(INC)/*.h /usr/include
+	cp $(lib)/*.a /usr/lib
 clean:
 	find ./ -iname "*.a" -exec rm {} \;
 	find ./ -iname "*.o" -exec rm {} \;
