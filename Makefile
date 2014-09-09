@@ -24,7 +24,7 @@ tests: testlib
 install:
 	echo -n "Installing the library"
 	cp ./$(INC)/*.h /usr/include
-	cp $(lib)/*.a /usr/lib
+	cp $(DST)/*.a /usr/lib
 clean:
 	find ./ -iname "*.a" -exec rm {} \;
 	find ./ -iname "*.o" -exec rm {} \;
