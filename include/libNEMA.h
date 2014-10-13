@@ -12,16 +12,21 @@ struct __gps_state{
 	int Satellites;
 	int  Fix;
 	float HDOP;      // Hosizontal dilution of precision
+};
+
+struct GpsHandler
+{
+	GpsState state;
 	void (*OnUpdate)(GpsState*);
 };
 
 extern int FD_GPS;
 
 int  lnConnect (const char* dev, int baud);
-int  lnGenState(GpsState* state, void (*UpdateCalback)(GpsState*));
+int  lnGenState(struct GpsHandler* hndlr, void (*UpdateCalback)(GpsState*));
 int  lnReadMsg (char* dst, int size);
 int  lnSendMsg (char* src, int size);
-int  lnParseMsg(GpsState* state, char* msg);
+int  lnParseMsg(struct GpsHandler* hndlr, char* msg);
 void lnPrintState(GpsState* state);
 
 #endif
