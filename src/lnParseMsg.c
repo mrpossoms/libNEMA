@@ -61,7 +61,7 @@ int __calc_checksum(char* msg, char** sumStr){
 	return c;
 }
 /*---------------------------------------------------------------------------*/
-int __GGA(GpsState* state, char* msgData){
+int __GGA(struct GpsHandler* hndlr, char* msgData){
 	int timeDone = 0;
 	int qualityDone = 0;
 	int HDOPDone = 0;
@@ -86,9 +86,9 @@ int __GGA(GpsState* state, char* msgData){
 		sscanf(min,  "%d", &minute);
 		sscanf(hour, "%d", &hr);
 
-		state->Second = (unsigned char)seconds;
-		state->Minute = (unsigned char)minute;
-		state->Hour   = (unsigned char)hr;
+		hndlr->state.Second = (unsigned char)seconds;
+		hndlr->state.Minute = (unsigned char)minute;
+		hndlr->state.Hour   = (unsigned char)hr;
 
 		timeDone = 1;
 	}
@@ -99,12 +99,12 @@ int __GGA(GpsState* state, char* msgData){
 
 		memcpy(deg, lastToken, 2);
 		sscanf(min, "%f", &minutes);
-		sscanf(deg, "%f", &state->Lat);
+		sscanf(deg, "%f", &hndlr->state.Lat);
 #ifdef DEBUG
 		printf("Token='%s' lastToken='%s'\n", token, lastToken);
 #endif
 
-		state->Lat += (MIN2DEG * minutes);
+		hndlr->state.Lat += (MIN2DEG * minutes);
 		latDone = 1;
 	}
 	else if(!strcmp(token, "W")){
@@ -114,12 +114,12 @@ int __GGA(GpsState* state, char* msgData){
 
 		memcpy(deg, lastToken, 3);
 		sscanf(min, "%f", &minutes);
-		sscanf(deg, "%f", &state->Lon);
+		sscanf(deg, "%f", &hndlr->state.Lon);
 #ifdef DEBUG
 		printf("Token='%s' lastToken='%s'\n", token, lastToken);
 #endif
 
-		state->Lon += (MIN2DEG * minutes);
+		hndlr->state.Lon += (MIN2DEG * minutes);
 		lonDone = 1;
 	}
 	else if(!latDone || !lonDone){
@@ -128,21 +128,21 @@ int __GGA(GpsState* state, char* msgData){
 		continue;
 	}
 	else if(!qualityDone){
-		sscanf(token, "%d", &state->Fix);
+		sscanf(token, "%d", &hndlr->state.Fix);
 		qualityDone = 1;
 	}
 	else if(!satellitesDone){
 		int satillites;
 		sscanf(token, "%d", &satillites);
-		state->Satellites = satillites;
+		hndlr->state.Satellites = satillites;
 		satellitesDone = 1;
 	}
 	else if(!HDOPDone){
-		sscanf(token, "%f", &state->HDOP);
+		sscanf(token, "%f", &hndlr->state.HDOP);
 		HDOPDone = 1;
 	}
 	else if(!altitudeDone){
-		sscanf(token, "%f", &state->Altitude);
+		sscanf(token, "%f", &hndlr->state.Altitude);
 		altitudeDone = 1;
 	}
 	
@@ -150,7 +150,7 @@ int __GGA(GpsState* state, char* msgData){
 	return 0;
 }
 /*---------------------------------------------------------------------------*/
-int __GLL(GpsState* state, char* msgData){
+int __GLL(struct GpsHandler* hndlr, char* msgData){
 	START_PARSE()
 		if(!strcmp(token, "N")){
 			char* min = lastToken + 2;
@@ -159,9 +159,9 @@ int __GLL(GpsState* state, char* msgData){
 
 			memcpy(deg, lastToken, 2);
 			sscanf(min, "%f", &minutes);
-			sscanf(deg, "%f", &state->Lat);
+			sscanf(deg, "%f", &hndlr->state.Lat);
 
-			state->Lat += (MIN2DEG * minutes);
+			hndlr->state.Lat += (MIN2DEG * minutes);
 		}
 
 		if(!strcmp(token, "W")){
@@ -171,16 +171,16 @@ int __GLL(GpsState* state, char* msgData){
 	
 			memcpy(deg, lastToken, 3);
 			sscanf(min, "%f", &minutes);
-			sscanf(deg, "%f", &state->Lon);
+			sscanf(deg, "%f", &hndlr->state.Lon);
 
-			state->Lon += (MIN2DEG * minutes);
+			hndlr->state.Lon += (MIN2DEG * minutes);
 		}
 	CONTINUE_PARSE()
 
 	return 0;
 }
 /*---------------------------------------------------------------------------*/
-int lnParseMsg(GpsState* state, char* msg){
+int lnParseMsg(struct GpsHandler* hndlr, char* msg){
 	char msgType[6];
 	char* msgData = NULL, *checksumStr = NULL;
 	int msgIndex = -1;
@@ -206,10 +206,10 @@ int lnParseMsg(GpsState* state, char* msg){
 
 	switch(msgIndex){
 		case GPGGA:
-			__GGA(state, msgData);
+			__GGA(hndlr, msgData);
 			break;
 		case GPGLL:
-			__GLL(state, msgData);
+			__GLL(hndlr, msgData);
 			break;
 		case GPGSA:
 			break;
