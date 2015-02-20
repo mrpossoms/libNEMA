@@ -1,4 +1,5 @@
 #include "libNEMA.h"
+#include <unistd.h>
 #include <strings.h>
 #include <errno.h>
 

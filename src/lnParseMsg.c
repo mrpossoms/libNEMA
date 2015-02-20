@@ -24,7 +24,7 @@
 
 #define CONTINUE_PARSE() bzero(lastToken, 32);\
 	memcpy(lastToken, token, strlen(token));\
-	} while(token = strtok(NULL, ","));\
+	} while((token = strtok(NULL, ",")));\
 
 /*---------------------------------------------------------------------------*/
 int __is_checksum_valid(int checksum, char* sumStr){
@@ -76,16 +76,19 @@ int __GGA(GpsState* state, char* msgData){
 		char  min[3] = {0};
 		char* sec;
 		float seconds = 0;
+		int minute, hr;
 
 		memcpy(hour, token, 2);
 		memcpy(min, token + 2, 2);
 		sec = token + 4;
 
 		sscanf(sec,  "%f", &seconds);
-		sscanf(min,  "%d", &state->Minute);
-		sscanf(hour, "%d", &state->Hour);
+		sscanf(min,  "%d", &minute);
+		sscanf(hour, "%d", &hr);
 
-		state->Second = (int)seconds;
+		state->Second = (unsigned char)seconds;
+		state->Minute = (unsigned char)minute;
+		state->Hour   = (unsigned char)hr;
 
 		timeDone = 1;
 	}
@@ -129,7 +132,9 @@ int __GGA(GpsState* state, char* msgData){
 		qualityDone = 1;
 	}
 	else if(!satellitesDone){
-		sscanf(token, "%d", &state->Satellites);
+		int satillites;
+		sscanf(token, "%d", &satillites);
+		state->Satellites = satillites;
 		satellitesDone = 1;
 	}
 	else if(!HDOPDone){
