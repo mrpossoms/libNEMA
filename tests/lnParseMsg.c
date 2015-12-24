@@ -73,20 +73,25 @@ void lnParseMsgShouldSucceedGPGLL(){
 	assert((int)state.Lon == 123);
 }
 
-int main(void){
+int main(int argc, char* argv[]){
 	char buf[1024];
 	GpsState state = {0};
 	
+	if(argc < 3){
+		printf("Usage:\n\t[serial device path] [baud]\n");
+	}	
+
+
 	__title("lnParseMsg()");
 	bzero(buf, 1024);
 	
 	__msg("Connecting...");
-	int fd = lnConnect("/dev/ttyAMA0", 57600);
+	int fd = lnConnect(argv[1], atoi(argv[2]));
 	int size = 0, i = 0;
 
-	lnParseMsgShouldSucceedGPGLL();
-	lnParseMsgShouldFailBadCheckSum();
-	lnParseMsgShouldSucceedGPGAA();
+//	lnParseMsgShouldSucceedGPGLL();
+//	lnParseMsgShouldFailBadCheckSum();
+//	lnParseMsgShouldSucceedGPGAA();
 	
 	sleep(1);
 
