@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "libNEMA.h"
 #include "test.h"
 

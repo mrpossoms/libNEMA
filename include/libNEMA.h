@@ -23,7 +23,6 @@ struct GpsHandler
 extern int FD_GPS;
 
 int  lnConnect (const char* dev, int baud);
-int  lnGenState(struct GpsHandler* hndlr, void (*UpdateCalback)(GpsState*));
 int  lnReadMsg (char* dst, int size);
 int  lnSendMsg (char* src, int size);
 int  lnParseMsg(struct GpsHandler* hndlr, char* msg);

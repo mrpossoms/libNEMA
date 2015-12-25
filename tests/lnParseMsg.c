@@ -1,5 +1,8 @@
 #include "libNEMA.h"
 #include "test.h"
+
+#include <unistd.h>
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 
@@ -10,72 +13,66 @@ char* GPGAA_TEST = "$GPGGA,,,,,,0,00,99.99,,,,,,*48";
 
 void lnParseMsgShouldFailBadCheckSum(void){
 	char buf[1024];
-	GpsState state = {0};
+	struct GpsHandler hnd = {0};
 	__title("lnParseMsg()");
 	bzero(buf, 1024);
 	
-	lnGenState(&state, NULL);
-
 	memcpy(buf, GPGLL_TEST_BAD, strlen(GPGLL_TEST_BAD));
 	printf("%s\n", buf);
-	assert(lnParseMsg(&state, buf) < 0); // should fail
-	lnPrintState(&state);
+	assert(lnParseMsg(&hnd, buf) < 0); // should fail
+	lnPrintState(&hnd.state);
 	printf("\n");
 }
 
 void lnParseMsgShouldSucceedGPGAA(void){
-	GpsState state = {0};
+	struct GpsHandler hnd = {0};
 	char buf[1024];
 	__title("lnParseMsg()");
 	bzero(buf, 1024);
 	
-	lnGenState(&state, NULL);
-
 	memcpy(buf, GPGAA_TEST, strlen(GPGAA_TEST));
 	printf("%s\n", buf);
-	lnParseMsg(&state, buf);
-	lnPrintState(&state);
+	lnParseMsg(&hnd, buf);
+	lnPrintState(&hnd.state);
 	printf("\n");
 
 	// assert date
-	assert(state.Hour == 0);
-	assert(state.Minute == 0);
-	assert(state.Second == 0);
+	assert(hnd.state.Hour == 0);
+	assert(hnd.state.Minute == 0);
+	assert(hnd.state.Second == 0);
 
 	// assert coordinates
-	assert((int)state.Lat == 0);
-	assert((int)state.Lon == 0);
-	assert((int)state.Altitude == 0);
+	assert((int)hnd.state.Lat == 0);
+	assert((int)hnd.state.Lon == 0);
+	assert((int)hnd.state.Altitude == 0);
 
-	// assert fix state
-	assert(state.Fix == 0);
-	assert(state.Satellites == 0);
-	assert(state.HDOP == 0);
+	// assert fix hnd
+	assert(hnd.state.Fix == 0);
+	assert(hnd.state.Satellites == 0);
+	assert(hnd.state.HDOP == 0);
 }
 
 void lnParseMsgShouldSucceedGPGLL(){
-	GpsState state = {0};
+	struct GpsHandler hnd = {0};
 	char buf[1024];
 	__title("lnParseMsg()");
 	bzero(buf, 1024);
 	
-	lnGenState(&state, NULL);
-
 	memcpy(buf, GPGLL_TEST, strlen(GPGLL_TEST));
 	printf("%s\n", buf);
-	lnParseMsg(&state, buf);
+	lnParseMsg(&hnd, buf);
 	printf("\n");
-	lnPrintState(&state);
+	lnPrintState(&hnd.state);
 	printf("\n");
 	
 	// assert coordinates
-	assert((int)state.Lat == 49);
-	assert((int)state.Lon == 123);
+	assert((int)hnd.state.Lat == 49);
+	assert((int)hnd.state.Lon == 123);
 }
 
 int main(int argc, char* argv[]){
 	char buf[1024];
-	GpsState state = {0};
+	struct GpsHandler hnd = {0};
 	
 	if(argc < 3){
 		printf("Usage:\n\t[serial device path] [baud]\n");
@@ -99,16 +96,16 @@ int main(int argc, char* argv[]){
 		int i = 0;
 		//write(1, buf, size);
 		write(1, "\n", 1);
-		lnParseMsg(&state, buf);
+		lnParseMsg(&hnd, buf);
 		bzero(buf, 1024);
 
-		lnPrintState(&state);
+		lnPrintState(&hnd.state);
 	}
 
 	//assert(lnReadMsg(buf, 1024) > 0);
 	printf("len: %d\n", size);
 	printf("%s\n", buf);
 
-	assert(!lnParseMsg(&state, buf));
+	assert(!lnParseMsg(&hnd, buf));
 	return 0;
 }
