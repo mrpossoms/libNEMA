@@ -12,7 +12,6 @@ TSTS=./tests/*.c
 all:
 	gcc -I$(INC) -c $(SRC)
 	ar rcs $(DST)/$(LIB) *.o
-	rm *.o
 
 testlib: $(SRC)
 	gcc -I$(TSTINC) -c $(SRC)

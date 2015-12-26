@@ -1,6 +1,10 @@
 #ifndef __LIB_NEMA
 #define __LIB_NEMA
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	float Lat;
 	float Lon;
@@ -20,5 +24,9 @@ int  lnReadMsg (char* dst, int size);
 int  lnSendMsg (const char* src, int size);
 int  lnParseMsg(gpsState_t* hndlr, char* msg);
 void lnPrintState(gpsState_t* state);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

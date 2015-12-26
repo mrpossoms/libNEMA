@@ -1,7 +1,6 @@
 FLAGS=-Wint-to-pointer-cast
-SRC=./src/*.c
 INC=./../include
-LIB=./../lib/libNEMA.a
+LIB=-lNEMA
 LINK=-pthread -string
 
 all:
