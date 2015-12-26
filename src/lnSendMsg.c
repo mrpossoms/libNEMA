@@ -2,6 +2,6 @@
 #include <stdio.h>    // Standard input/output definitions 
 #include <unistd.h>
 
-int lnSendMsg(char* src, int size){
+int lnSendMsg(const char* src, int size){
 	return write(FD_GPS, src, size);
 }

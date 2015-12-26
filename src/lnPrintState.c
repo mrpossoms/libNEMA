@@ -11,7 +11,7 @@ char* __FIX[] = {
 	"Dead reckoning"
 };
 
-void lnPrintState(GpsState* state){
+void lnPrintState(gpsState_t* state){
 	printf("Position: %fN, %fW\n", state->Lat, state->Lon);
 	printf("Altitude: %f\n", state->Altitude);
 	printf("Speed: %f\n", state->Speed);

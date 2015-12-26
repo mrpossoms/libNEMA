@@ -1,9 +1,7 @@
 #ifndef __LIB_NEMA
 #define __LIB_NEMA
 
-struct __gps_state;
-typedef struct __gps_state GpsState;
-struct __gps_state{
+typedef struct {
 	float Lat;
 	float Lon;
 	float Altitude;
@@ -12,20 +10,15 @@ struct __gps_state{
 	unsigned char Satellites;
 	int  Fix;
 	float HDOP;      // Hosizontal dilution of precision
-};
-
-struct GpsHandler
-{
-	GpsState state;
-	void (*OnUpdate)(GpsState*);
-};
+	unsigned char checksum;
+} gpsState_t;
 
 extern int FD_GPS;
 
 int  lnConnect (const char* dev, int baud);
 int  lnReadMsg (char* dst, int size);
-int  lnSendMsg (char* src, int size);
-int  lnParseMsg(struct GpsHandler* hndlr, char* msg);
-void lnPrintState(GpsState* state);
+int  lnSendMsg (const char* src, int size);
+int  lnParseMsg(gpsState_t* hndlr, char* msg);
+void lnPrintState(gpsState_t* state);
 
 #endif
