@@ -89,6 +89,10 @@ int main(int argc, char* argv[]){
 //	lnParseMsgShouldSucceedGPGLL();
 //	lnParseMsgShouldFailBadCheckSum();
 //	lnParseMsgShouldSucceedGPGAA();
+
+	const char* refreshRate = "$PMTK220,100*2F\r\n";
+	size_t len = strlen(refreshRate);
+	assert(lnSendMsg(refreshRate, len) == len); 
 	
 	sleep(1);
 
