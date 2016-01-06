@@ -104,7 +104,7 @@ static int GGA(gpsState_t* state, char* msgData){
 
 		timeDone = 1;
 	}
-	else if(!strcmp(token, "N")){
+	else if(!strcmp(token, "N") || !strcmp(token, "S")){
 		char* min = lastToken + 2;
 		char  deg[3] = {0};
 		float minutes = 0;
@@ -117,9 +117,15 @@ static int GGA(gpsState_t* state, char* msgData){
 #endif
 
 		state->Lat += (MIN2DEG * minutes);
+
+		// negate the coordinate if in southern hemisphere
+		if(!strcmp(token, "S")){
+			state->Lat *= -1;
+		}
+
 		latDone = 1;
 	}
-	else if(!strcmp(token, "W")){
+	else if(!strcmp(token, "W") || !strcmp(token, "E")){
 		char* min = lastToken + 3;
 		char  deg[4] = {0};
 		float minutes = 0;
@@ -132,6 +138,12 @@ static int GGA(gpsState_t* state, char* msgData){
 #endif
 
 		state->Lon += (MIN2DEG * minutes);
+		
+		// negate the coordinate if in the western hemisphere
+		if(!strcmp(token, "W")){
+			state->Lon *= -1;
+		}
+
 		lonDone = 1;
 	}
 	else if(!latDone || !lonDone){
