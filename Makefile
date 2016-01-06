@@ -22,8 +22,8 @@ tests: testlib
 	$(foreach test, $(TSTS), gcc $(test) -o $(TST)/bin/$(test).bin
 install:
 	echo -n "Installing the library"
-	cp ./$(INC)/*.h /usr/include
-	cp $(DST)/*.a /usr/lib
+	cp ./$(INC)/*.h /usr/local/include
+	cp $(DST)/*.a /usr/local/lib
 clean:
 	find ./ -iname "*.a" -exec rm {} \;
 	find ./ -iname "*.o" -exec rm {} \;

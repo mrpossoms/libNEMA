@@ -164,7 +164,7 @@ static int GGA(gpsState_t* state, char* msgData){
 /*---------------------------------------------------------------------------*/
 static int GLL(gpsState_t* state, char* msgData){
 	START_PARSE()
-		if(!strcmp(token, "N")){
+		if(!strcmp(token, "N") || !strcmp(token, "S")){
 			char* min = lastToken + 2;
 			char  deg[3] = {0};
 			float minutes = 0;
@@ -174,9 +174,14 @@ static int GLL(gpsState_t* state, char* msgData){
 			sscanf(deg, "%f", &state->Lat);
 
 			state->Lat += (MIN2DEG * minutes);
+			
+			// negate the coordinate if in southern hemisphere
+			if(!strcmp(token, "S")){
+				state->Lon *= -1;
+			}
 		}
 
-		if(!strcmp(token, "W")){
+		if(!strcmp(token, "W") || !strcmp(token, "E")){
 			char* min = lastToken + 3;
 			char  deg[4] = {0};
 			float minutes = 0;
@@ -186,6 +191,11 @@ static int GLL(gpsState_t* state, char* msgData){
 			sscanf(deg, "%f", &state->Lon);
 
 			state->Lon += (MIN2DEG * minutes);
+
+			// negate the coordinate if in the western hemisphere
+			if(!strcmp(token, "W")){
+				state->Lon *= -1;
+			}
 		}
 	CONTINUE_PARSE()
 
