@@ -12,7 +12,7 @@ char* __FIX[] = {
 };
 
 void lnPrintState(gpsState_t* state){
-	printf("Position: %fN, %fW\n", state->Lat, state->Lon);
+	printf("Position: %f, %f\n", state->Lat, state->Lon);
 	printf("Altitude: %f\n", state->Altitude);
 	printf("Speed: %f\n", state->Speed);
 	printf("Update Time: %02d:%02d:%02d\n",

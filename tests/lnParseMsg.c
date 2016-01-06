@@ -67,7 +67,7 @@ void lnParseMsgShouldSucceedGPGLL(){
 	
 	// assert coordinates
 	assert((int)state.Lat == 49);
-	assert((int)state.Lon == 123);
+	assert((int)state.Lon == -123);
 }
 
 int main(int argc, char* argv[]){
