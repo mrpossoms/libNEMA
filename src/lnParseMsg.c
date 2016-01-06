@@ -177,7 +177,7 @@ static int GLL(gpsState_t* state, char* msgData){
 			
 			// negate the coordinate if in southern hemisphere
 			if(!strcmp(token, "S")){
-				state->Lon *= -1;
+				state->Lat *= -1;
 			}
 		}
 
