@@ -8,14 +8,14 @@ int lnReadMsg(char* buf, int size){
 
 	bzero(buf, sizeof(buf));
 
-	if(!FD_GPS){
+	if(!LN_FD_GPS){
 		errno = EBADF;
 		return -1;
 	}
 
 	// wait for the beginning of the message
 	while(buf[0] != '$')
-		i = read(FD_GPS, buf, size);
+		i = read(LN_FD_GPS, buf, size);
 
 	return i;
 }

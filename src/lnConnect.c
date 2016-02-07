@@ -1,26 +1,29 @@
 #include "libNEMA.h"
-#include <stdio.h>    // Standard input/output definitions 
-#include <unistd.h>   // UNIX standard function definitions 
-#include <fcntl.h>    // File control definitions 
-#include <errno.h>    // Error number definitions 
-#include <termios.h>  // POSIX terminal control definitions 
-#include <string.h>   // String function definitions 
+#include <stdio.h>    // Standard input/output definitions
+#include <unistd.h>   // UNIX standard function definitions
+#include <fcntl.h>    // File control definitions
+#include <errno.h>    // Error number definitions
+#include <string.h>   // String function definitions
 #include <sys/ioctl.h>
 
-int FD_GPS = 0;
+int LN_FD_GPS = 0;
+struct termios LN_ORIG_TOPTIONS;
 
 int lnConnect(const char* dev, int baud){
-	struct termios toptions;
+	struct termios toptions = {};
 
-	if(!(FD_GPS = open(dev, O_RDWR))){
+	if(!(LN_FD_GPS = open(dev, O_RDWR))){
         	perror("serialport_init: Unable to open port ");
         	return -1;
 	}
-	
-	if (tcgetattr(FD_GPS, &toptions) < 0) {
+
+	if (tcgetattr(LN_FD_GPS, &LN_ORIG_TOPTIONS) < 0) {
 		perror("serialport_init: Couldn't get term attributes");
 		return -1;
 	}
+
+	// keep LN_ORIG_TOPTIONS as original (for disconnect)
+	toptions = LN_ORIG_TOPTIONS;
 
 	speed_t brate = baud; // let you override switch below if needed
 
@@ -48,12 +51,12 @@ int lnConnect(const char* dev, int baud){
 	toptions.c_cc[VTIME] = 0;
 	toptions.c_cc[VEOL]   = '\r';
 	toptions.c_cc[VEOL2]  = '\n';
-	
-	tcsetattr(FD_GPS, TCSANOW, &toptions);
-	if( tcsetattr(FD_GPS, TCSAFLUSH, &toptions) < 0) {
+
+	tcsetattr(LN_FD_GPS, TCSANOW, &toptions);
+	if( tcsetattr(LN_FD_GPS, TCSAFLUSH, &toptions) < 0) {
 		perror("init_serialport: Couldn't set term attributes");
 		return -1;
 	}
 
-	return FD_GPS;
+	return LN_FD_GPS;
 }
