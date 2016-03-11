@@ -15,6 +15,7 @@ void lnPrintState(gpsState_t* state){
 	printf("Position: %f, %f\n", state->Lat, state->Lon);
 	printf("Altitude: %f\n", state->Altitude);
 	printf("Speed: %f\n", state->Speed);
+	printf("Bearing: %f\n", state->Bearing);
 	printf("Update Time: %02d:%02d:%02d\n",
 		state->Hour,
 		state->Minute,

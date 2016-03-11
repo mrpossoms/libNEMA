@@ -271,6 +271,7 @@ int lnParseMsg(gpsState_t* state, char* msg){
 		case GPRMC:
 			break;
 		case GPVTG:
+			VTG(state, msgData);
 			break;
 		case GPTXT:
 			break;
