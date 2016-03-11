@@ -10,8 +10,9 @@ extern "C" {
 typedef struct {
 	float Lat;
 	float Lon;
-	float Altitude;
-	float Speed;
+	float Altitude; // Meters
+	float Speed;    // KM / Hr
+	float Bearing;  // Radians
 	unsigned char Hour, Minute, Second;
 	unsigned char Satellites;
 	int  Fix;

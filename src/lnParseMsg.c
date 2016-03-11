@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <strings.h>
 #include <string.h>
+#include <math.h>
 
 //#define DEBUG
 
@@ -21,6 +22,9 @@
 	char* token;\
 	token = strtok(msgData, ",");\
 	do{\
+
+#define IS_TOKEN(str) (!strcmp(token, (str)))
+#define IS_LAST_TOKEN(str) (!strcmp(lastToken, (str)))
 
 #define CONTINUE_PARSE() bzero(lastToken, 32);\
 	memcpy(lastToken, token, strlen(token));\
@@ -49,7 +53,7 @@ static int calc_checksum(char* msg, char** sumStr){
 #endif
 
 		c ^= msg[i];
-	}		
+	}
 
 #ifdef DEBUG
 	printf("\n%c %c\n", msg[0], msg[2]);
@@ -68,7 +72,7 @@ static int calc_buf_checksum(void* buf, size_t bufLen){
 	   or the beginning of the sum */
 	for(;bufLen--;){
 		c ^= ((unsigned char*)buf)[bufLen];
-	}		
+	}
 
 	return c;
 }
@@ -104,7 +108,7 @@ static int GGA(gpsState_t* state, char* msgData){
 
 		timeDone = 1;
 	}
-	else if(!strcmp(token, "N") || !strcmp(token, "S")){
+	else if(IS_TOKEN("N") || IS_TOKEN("S")){
 		char* min = lastToken + 2;
 		char  deg[3] = {0};
 		float minutes = 0;
@@ -119,13 +123,13 @@ static int GGA(gpsState_t* state, char* msgData){
 		state->Lat += (MIN2DEG * minutes);
 
 		// negate the coordinate if in southern hemisphere
-		if(!strcmp(token, "S")){
+		if(IS_TOKEN("S")){
 			state->Lat *= -1;
 		}
 
 		latDone = 1;
 	}
-	else if(!strcmp(token, "W") || !strcmp(token, "E")){
+	else if(IS_TOKEN("W") || IS_TOKEN("E")){
 		char* min = lastToken + 3;
 		char  deg[4] = {0};
 		float minutes = 0;
@@ -138,9 +142,9 @@ static int GGA(gpsState_t* state, char* msgData){
 #endif
 
 		state->Lon += (MIN2DEG * minutes);
-		
+
 		// negate the coordinate if in the western hemisphere
-		if(!strcmp(token, "W")){
+		if(IS_TOKEN("W")){
 			state->Lon *= -1;
 		}
 
@@ -169,14 +173,14 @@ static int GGA(gpsState_t* state, char* msgData){
 		sscanf(token, "%f", &state->Altitude);
 		altitudeDone = 1;
 	}
-	
+
 	CONTINUE_PARSE()
 	return 0;
 }
 /*---------------------------------------------------------------------------*/
 static int GLL(gpsState_t* state, char* msgData){
 	START_PARSE()
-		if(!strcmp(token, "N") || !strcmp(token, "S")){
+		if(IS_TOKEN("N") || IS_TOKEN("S")){
 			char* min = lastToken + 2;
 			char  deg[3] = {0};
 			float minutes = 0;
@@ -186,18 +190,18 @@ static int GLL(gpsState_t* state, char* msgData){
 			sscanf(deg, "%f", &state->Lat);
 
 			state->Lat += (MIN2DEG * minutes);
-			
+
 			// negate the coordinate if in southern hemisphere
-			if(!strcmp(token, "S")){
+			if(IS_TOKEN("S")){
 				state->Lat *= -1;
 			}
 		}
 
-		if(!strcmp(token, "W") || !strcmp(token, "E")){
+		if(IS_TOKEN("W") || IS_TOKEN("E")){
 			char* min = lastToken + 3;
 			char  deg[4] = {0};
 			float minutes = 0;
-	
+
 			memcpy(deg, lastToken, 3);
 			sscanf(min, "%f", &minutes);
 			sscanf(deg, "%f", &state->Lon);
@@ -205,12 +209,27 @@ static int GLL(gpsState_t* state, char* msgData){
 			state->Lon += (MIN2DEG * minutes);
 
 			// negate the coordinate if in the western hemisphere
-			if(!strcmp(token, "W")){
+			if(IS_TOKEN("W")){
 				state->Lon *= -1;
 			}
 		}
 	CONTINUE_PARSE()
 
+	return 0;
+}
+/*---------------------------------------------------------------------------*/
+static int VTG(gpsState_t* state, char* msgData){
+	START_PARSE()
+
+	if(IS_TOKEN("T")){ // true track, made good
+		sscanf(lastToken, "%f", &state->Bearing);
+		state->Bearing *= (M_PI / 180.0f); // convert to radians
+	}
+	else if(IS_TOKEN("K")){
+		scanf(lastToken, "%f", &state->Speed);
+	}
+
+	CONTINUE_PARSE()
 	return 0;
 }
 /*---------------------------------------------------------------------------*/
