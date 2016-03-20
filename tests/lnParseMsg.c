@@ -90,16 +90,17 @@ int main(int argc, char* argv[]){
 	lnParseMsgShouldFailBadCheckSum();
 	lnParseMsgShouldSucceedGPGAA();
 
+/*
 	const char* refreshRate = "$PMTK220,100*2F\r\n";
 	size_t len = strlen(refreshRate);
 	assert(lnSendMsg(refreshRate, len) == len); 
-	
+*/	
 	sleep(1);
 
 	while((size = lnReadMsg(buf, 1024))){
 		int i = 0;
 		//write(1, buf, size);
-		write(1, "\n", 1);
+		write(1, "\nPRSING\n", 8);
 		lnParseMsg(&state, buf);
 		bzero(buf, 1024);
 

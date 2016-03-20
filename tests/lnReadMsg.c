@@ -10,7 +10,7 @@ int main(void){
 	bzero(buf, 1024);
 	
 	__msg("Connecting...");
-	int fd = lnConnect("/dev/ttyAMA0", 9600);
+	int fd = lnConnect("/dev/ttyAMA0", 57600);
 	int size = 0;
 
 	sleep(1);

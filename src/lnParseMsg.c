@@ -28,7 +28,7 @@
 
 #define CONTINUE_PARSE() bzero(lastToken, 32);\
 	memcpy(lastToken, token, strlen(token));\
-	} while((token = strtok(NULL, ",")));\
+	} while((token = strtok(NULL, ",")) != NULL);\
 
 /*---------------------------------------------------------------------------*/
 static int is_checksum_valid(int checksum, char* sumStr){
@@ -220,16 +220,15 @@ static int GLL(gpsState_t* state, char* msgData){
 /*---------------------------------------------------------------------------*/
 static int VTG(gpsState_t* state, char* msgData){
 	START_PARSE()
-
 	if(IS_TOKEN("T")){ // true track, made good
 		sscanf(lastToken, "%f", &state->Bearing);
 		state->Bearing *= (M_PI / 180.0f); // convert to radians
 	}
 	else if(IS_TOKEN("K")){
-		scanf(lastToken, "%f", &state->Speed);
+		sscanf(lastToken, "%f", &state->Speed);
 	}
-
 	CONTINUE_PARSE()
+
 	return 0;
 }
 /*---------------------------------------------------------------------------*/
