@@ -259,7 +259,7 @@ int lnParseMsg(gpsState_t* state, char* msg){
 	// find the correct message type and process
 	for(int i = sizeof(nips) / sizeof(struct ln_nip); i--;){
 		const struct ln_nip* nip = nips + i;
-		if(!strcmp(nip->name, msgType) && nips->procsessor){
+		if(!strcmp(nip->name, msgType) && nip->procsessor){
 			#ifdef DEBUG
 				printf("%s\n%s\n", msgType, msgData);
 			#endif
