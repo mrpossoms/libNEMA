@@ -7,14 +7,6 @@
 
 //#define DEBUG
 
-#define GPGGA 0
-#define GPGLL 1
-#define GPGSA 2
-#define GPGSV 3
-#define GPRMC 4
-#define GPVTG 5
-#define GPTXT 6
-
 #define MIN2DEG 0.0166666667f
 
 #define START_PARSE() char checksum = 0;\
@@ -29,6 +21,12 @@
 #define CONTINUE_PARSE() bzero(lastToken, 32);\
 	memcpy(lastToken, token, strlen(token));\
 	} while((token = strtok(NULL, ",")) != NULL);\
+
+struct ln_nip {
+	const char* name;
+	int(*procsessor)(gpsState_t*, char*);
+	int messageCode;
+};
 
 /*---------------------------------------------------------------------------*/
 static int is_checksum_valid(int checksum, char* sumStr){
@@ -46,7 +44,7 @@ static int calc_checksum(char* msg, char** sumStr){
 	int c = 0, i = 1;
 
 	/* consume string, until the next char is the '*'
-	   or the beginning of the sum */
+		or the beginning of the sum */
 	for(; msg[i] != '*'; i++){
 #ifdef DEBUG
 		printf("%c ", msg[i]);
@@ -69,7 +67,7 @@ static int calc_buf_checksum(void* buf, size_t bufLen){
 	int c = 0;
 
 	/* consume string, until the next char is the '*'
-	   or the beginning of the sum */
+		or the beginning of the sum */
 	for(;bufLen--;){
 		c ^= ((unsigned char*)buf)[bufLen];
 	}
@@ -248,39 +246,30 @@ int lnParseMsg(gpsState_t* state, char* msg){
 	memcpy((char*)msgType, &msg[1], 5);
 	msgData = &msg[6];
 
-	if(!strcmp(msgType, "GPGGA")) msgIndex = GPGGA;
-	if(!strcmp(msgType, "GPGLL")) msgIndex = GPGLL;
-	if(!strcmp(msgType, "GPGSA")) msgIndex = GPGSA;
-	if(!strcmp(msgType, "GPGSV")) msgIndex = GPGSV;
-	if(!strcmp(msgType, "GPRMC")) msgIndex = GPRMC;
-	if(!strcmp(msgType, "GPVTG")) msgIndex = GPVTG;
-	if(!strcmp(msgType, "GPTXT")) msgIndex = GPTXT;
+	const struct ln_nip nips[] = {
+		{ "GPGGA", GGA,  LN_GPGGA },
+		{ "GPGLL", GLL,  LN_GPGLL },
+		{ "GPGSA", NULL, LN_GPGSA }, // proc unimplemented
+		{ "GPGSV", NULL, LN_GPGSV }, // proc unimplemented
+		{ "GPRMC", NULL, LN_GPRMC }, // proc unimplemented
+		{ "GPVTG", VTG,  LN_GPVTG },
+		{ "GPTXT", NULL, LN_GPTXT }, // proc unimplemented
+	};
 
-	switch(msgIndex){
-		case GPGGA:
-			GGA(state, msgData);
-			break;
-		case GPGLL:
-			GLL(state, msgData);
-			break;
-		case GPGSA:
-			break;
-		case GPGSV:
-			break;
-		case GPRMC:
-			break;
-		case GPVTG:
-			VTG(state, msgData);
-			break;
-		case GPTXT:
-			break;
+	// find the correct message type and process
+	for(int i = sizeof(nips) / sizeof(struct ln_nip); i--;){
+		const struct ln_nip* nip = nips + i;
+		if(!strcmp(nip->name, msgType) && nips->procsessor){
+			#ifdef DEBUG
+				printf("%s\n%s\n", msgType, msgData);
+			#endif
+
+			nip->procsessor(state, msgData);
+			state->checksum = calc_buf_checksum(state, sizeof(gpsState_t) - sizeof(unsigned char));
+
+			return nip->messageCode;
+		}
 	}
 
-#ifdef DEBUG
-	printf("%s\n%s\n", msgType, msgData);
-#endif
-
-	state->checksum = calc_buf_checksum(state, sizeof(gpsState_t) - sizeof(unsigned char));
-
-	return 0;
+	return -1;
 }

@@ -13,8 +13,8 @@ int lnConnect(const char* dev, int baud){
 	struct termios toptions = {};
 
 	if(!(LN_FD_GPS = open(dev, O_RDWR))){
-        	perror("serialport_init: Unable to open port ");
-        	return -1;
+		perror("serialport_init: Unable to open port ");
+		return -1;
 	}
 
 	if (tcgetattr(LN_FD_GPS, &LN_ORIG_TOPTIONS) < 0) {
@@ -38,7 +38,7 @@ int lnConnect(const char* dev, int baud){
 	// no flow control
 	toptions.c_cflag &= ~CRTSCTS;
 
-    //toptions.c_cflag &= ~HUPCL; // disable hang-up-on-close to avoid reset
+	 //toptions.c_cflag &= ~HUPCL; // disable hang-up-on-close to avoid reset
 	// turn on READ & ignore ctrl lines
 	toptions.c_cflag |= CREAD | CLOCAL;
 	// turn off s/w flow ctrl
@@ -53,7 +53,7 @@ int lnConnect(const char* dev, int baud){
 	toptions.c_cc[VEOL2]  = '\n';
 
 	tcsetattr(LN_FD_GPS, TCSANOW, &toptions);
-	if( tcsetattr(LN_FD_GPS, TCSAFLUSH, &toptions) < 0) {
+	if(tcsetattr(LN_FD_GPS, TCSAFLUSH, &toptions) < 0) {
 		perror("init_serialport: Couldn't set term attributes");
 		return -1;
 	}

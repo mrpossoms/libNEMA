@@ -7,6 +7,14 @@
 extern "C" {
 #endif
 
+#define LN_GPGGA 0
+#define LN_GPGLL 1
+#define LN_GPGSA 2
+#define LN_GPGSV 3
+#define LN_GPRMC 4
+#define LN_GPVTG 5
+#define LN_GPTXT 6
+
 typedef struct {
 	float Lat;
 	float Lon;
