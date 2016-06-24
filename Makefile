@@ -1,4 +1,4 @@
-FLAGS=-Wint-to-pointer-cast
+FLAGS=-Wint-to-pointer-cast -g
 SRC=./src/*.c
 INC=./include
 DST=./lib
@@ -10,7 +10,7 @@ TST=./tests
 TSTS=./tests/*.c
 
 all:
-	gcc -I$(INC) -c $(SRC)
+	gcc -I$(INC) $(FLAGS) -c $(SRC)
 	ar rcs $(DST)/$(LIB) *.o
 
 testlib: $(SRC)
